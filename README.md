@@ -2,9 +2,9 @@
 
 ## Overview
 
-A scraper and a stats analyzer for local cricket
+A scraper and a stats analyzer for local cricket. Created to get better and more useful statistics for local cricket than other similar websites. 
 
-A tool created to get better and more useful statistics for local cricket than other similar websites. Features include:
+Features include:
 
 - See players stats filtered by season, club, grade, or segment (junior/senior), to better understand the players in your team
 
@@ -12,7 +12,7 @@ A tool created to get better and more useful statistics for local cricket than o
 
 - Fun stats such as batting bingo, and [Nohit-Brohit Line](https://i.redd.it/ezgnsrztdaa11.png)
 
-Can be especially helpful for captains to help work out batting orders, and bowling options. First time captaining or have new players to your team?
+Can be especially helpful for captains to help work out the batting order and bowling options. First time captaining or have new players in your team?
 
 - See where they bat their best. Do they usually open the batting? Or bat somewhere in the middle order? Or do they just bat all over the place?
 
