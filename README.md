@@ -1,5 +1,7 @@
 # Local Cricket Stats Assistant
 
+## Overview
+
 A scraper and a stats analyzer for local cricket
 
 A tool created to get better and more useful statistics for local cricket than other similar websites. Features include:
@@ -17,3 +19,15 @@ Can be especially helpful for captains to help work out batting orders, and bowl
 - See a breakdown of their dismissals. Are they getting out bowled and LBW a lot? Something you can help them work on at training?
 
 - Or are they more of a bowler? Work out how many overs they usually bowl in a match/innings, to make sure you aren't over bowling them and risking injuries
+
+## Example/Screenshots
+
+[Here is an example site using fictional characters](https://lcsa-demo.netlify.app/)
+
+And here are some screenshots of the various different stats/views.
+
+![Screenshot1](/Screenshots/LCSA-Screenshot1.png)
+![Screenshot2](/Screenshots/LCSA-Screenshot2.png)
+![Screenshot3](/Screenshots/LCSA-Screenshot3.png)
+![Screenshot4](/Screenshots/LCSA-Screenshot4.png)
+![Screenshot5](/Screenshots/LCSA-Screenshot5.png)
