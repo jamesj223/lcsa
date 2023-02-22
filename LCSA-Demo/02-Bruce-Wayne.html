@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- New js and css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <!-- Accordion CSS -->
+    <style>
+        .accordion-button {color: black;background-color:#a9a9a9;}
+    .accordion-button:not(.collapsed) {color: black;background-color: #DCDCDC;}
+    .accordion-button:not(.collapsed)::after {background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");}
+    .accordion-button:focus {border-color: #5cb85c;  box-shadow: none; -webkit-box-shadow: none;}
+    </style>
+    <!-- Table Freeze CSS -->
+    <style>
+        table { display: block; overflow-x: auto;  }
+    th:first-child { position:sticky; left:0px; background-color:#f8f9fa; border: 1px #dee2e6; background-clip: padding-box;}
+    td:first-child { position:sticky; left:0px; background-color:#ffffff; border: 1px #dee2e6; background-clip: padding-box;}
+    </style>
+    <title>02-Bruce-Wayne</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg justify-content-between" style="background-color:#fcd91d">
+        <div class="p-2"> <a class="nav-item" href="javascript:history.back()" style="color:black">&#8592; Back</a> </div>
+        <div class="p-2">
+            <h3 class="navbar-brand">02-Bruce-Wayne</h3>
+        </div>
+        <div class="p-2"> <span class="navbar-text collapse navbar-collapse">145 games</span> </div>
+    </nav>
+    <main class="bd-main" style="background-color:#A9A9A9">
+        <div class="container-lg p-3">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="batting-tab" data-bs-toggle="tab" href="#batting" role="tab" aria-controls="batting" aria-selected="true" style="color:black">Batting</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="bowling-tab" data-bs-toggle="tab" href="#bowling" role="tab" aria-controls="bowling" aria-selected="false" style="color:black">Bowling</a>
+                </li>
+            </ul>
+            <div class="tab-content bg-white" id="myTabContent">
+                <!-- Batting Content Tab -->
+                <div class="tab-pane fade show active" id="batting" role="tabpanel" aria-labelledby="batting-tab">
+                    <div class="card p-3">
+                        <div class="accordion">
+                            <div class="accordion-item ">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#KFGVFSHJIL" aria-expanded="true" aria-controls="-collapseOne">Batting - Overall Summary</button></h2>
+                                <div class="accordion-collapse collapse show" id="KFGVFSHJIL" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <div class="p-3 table-responsive">
+                                            <table class="table table-bordered table-sm" style="background-color:white">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th scope="col">Innings</th>
+                                                        <th scope="col">High Score</th>
+                                                        <th scope="col">Not Outs</th>
+                                                        <th scope="col">Ducks</th>
+                                                        <th scope="col">25s</th>
+                                                        <th scope="col">50s</th>
+                                                        <th scope="col">100s</th>
+                                                        <th scope="col">Aggregate</th>
+                                                        <th scope="col">Average</th>
+                                                        <th scope="col">25+ Scores</th>
+                                                        <th scope="col">25+ %</th>
+                                                        <th scope="col">Duck %</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>114</td>
+                                                        <td>83</td>
+                                                        <td>25</td>
+                                                        <td>10</td>
+                                                        <td>18</td>
+                                                        <td>6</td>
+                                                        <td>0</td>
+                                                        <td>1756</td>
+                                                        <td>19.73</td>
+                                                        <td>24</td>
+                                                        <td>21.1%</td>
+                                                        <td>8.8%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#QJJOKZODXJ" aria-expanded="true" aria-controls="-collapseOne">Batting Graphs</button></h2>
+                                <div class="accordion-collapse collapse show" id="QJJOKZODXJ" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <p><a href="images/67634-Batting.png"><img src="images/67634-Batting.png" class="img-fluid" alt="images/67634-Batting.png"></a></p>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                            <div class="accordion-item club">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#DSBFWNNVQK" aria-expanded="true" aria-controls="-collapseOne">Batting - Stats by Club</button></h2>
+                                <div class="accordion-collapse collapse show" id="DSBFWNNVQK" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <div class="p-3 table-responsive">
+                                            <table class="table table-bordered table-sm" style="background-color:white">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th scope="col">Club</th>
+                                                        <th scope="col">Innings</th>
+                                                        <th scope="col">High Score</th>
+                                                        <th scope="col">Not Outs</th>
+                                                        <th scope="col">Ducks</th>
+                                                        <th scope="col">25s</th>
+                                                        <th scope="col">50s</th>
+                                                        <th scope="col">100s</th>
+                                                        <th scope="col">Aggregate</th>
+                                                        <th scope="col">Average</th>
+                                                        <th scope="col">25+ Scores</th>
+                                                        <th scope="col">25+ %</th>
+                                                        <th scope="col">Duck %</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Gotham City Cricket Club</td>
+                                                        <td>95</td>
+                                                        <td>83</td>
+                                                        <td>18</td>
+                                                        <td>7</td>
+                                                        <td>17</td>
+                                                        <td>6</td>
+                                                        <td>0</td>
+                                                        <td>1568</td>
+                                                        <td>20.36</td>
+                                                        <td>23</td>
+                                                        <td>24.2%</td>
+                                                        <td>7.4%</td>
+                                                    </tr>
+                                                    <td>Metropolis Cricket Club</td>
+                                                    <td>19</td>
+                                                    <td>36</td>
+                                                    <td>7</td>
+                                                    <td>3</td>
+                                                    <td>1</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>188</td>
+                                                    <td>15.67</td>
+                                                    <td>1</td>
+                                                    <td>5.3%</td>
+                                                    <td>15.8%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                            <div class="accordion-item ">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#OTEFWOCSMN" aria-expanded="true" aria-controls="-collapseOne">Dismissal Breakdown</button></h2>
+                                <div class="accordion-collapse collapse show" id="OTEFWOCSMN" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <div class="p-3 table-responsive">
+                                            <table class="table table-bordered table-sm caption-top">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th scope="col">c</th>
+                                                        <th scope="col">b</th>
+                                                        <th scope="col">no</th>
+                                                        <th scope="col">lbw</th>
+                                                        <th scope="col">ro</th>
+                                                        <th scope="col">st</th>
+                                                        <th scope="col">rtno</th>
+                                                        <th scope="col">rh</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>42</td>
+                                                        <td>28</td>
+                                                        <td>23</td>
+                                                        <td>11</td>
+                                                        <td>5</td>
+                                                        <td>2</td>
+                                                        <td>2</td>
+                                                        <td>1</td>
+                                                    </tr>
+                                                    <td>36.8%</td>
+                                                    <td>24.6%</td>
+                                                    <td>20.2%</td>
+                                                    <td>9.6%</td>
+                                                    <td>4.4%</td>
+                                                    <td>1.8%</td>
+                                                    <td>1.8%</td>
+                                                    <td>0.9%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                            <div class="accordion-item ">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#WZJYTZAFKO" aria-expanded="true" aria-controls="-collapseOne">Batting Position</button></h2>
+                                <div class="accordion-collapse collapse show" id="WZJYTZAFKO" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <div class="p-3 table-responsive">
+                                            <table class="table table-bordered table-sm caption-top">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th scope="col">Position</th>
+                                                        <th scope="col">Innings</th>
+                                                        <th scope="col">High Score</th>
+                                                        <th scope="col">Not Outs</th>
+                                                        <th scope="col">Ducks</th>
+                                                        <th scope="col">25s</th>
+                                                        <th scope="col">50s</th>
+                                                        <th scope="col">100s</th>
+                                                        <th scope="col">Aggregate</th>
+                                                        <th scope="col">Average</th>
+                                                        <th scope="col">25+ Scores</th>
+                                                        <th scope="col">25+ %</th>
+                                                        <th scope="col">Duck %</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Opening</td>
+                                                        <td>20</td>
+                                                        <td>52</td>
+                                                        <td>2</td>
+                                                        <td>1</td>
+                                                        <td>5</td>
+                                                        <td>1</td>
+                                                        <td>0</td>
+                                                        <td>362</td>
+                                                        <td>20.11</td>
+                                                        <td>6</td>
+                                                        <td>30.0%</td>
+                                                        <td>5.0%</td>
+                                                    </tr>
+                                                    <td># 3</td>
+                                                    <td>9</td>
+                                                    <td>21</td>
+                                                    <td>1</td>
+                                                    <td>1</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>103</td>
+                                                    <td>12.88</td>
+                                                    <td>0</td>
+                                                    <td>0.0%</td>
+                                                    <td>11.1%</td>
+                                                    </tr>
+                                                    <td># 4</td>
+                                                    <td>19</td>
+                                                    <td>83</td>
+                                                    <td>4</td>
+                                                    <td>0</td>
+                                                    <td>3</td>
+                                                    <td>2</td>
+                                                    <td>0</td>
+                                                    <td>370</td>
+                                                    <td>24.67</td>
+                                                    <td>5</td>
+                                                    <td>26.3%</td>
+                                                    <td>0.0%</td>
+                                                    </tr>
+                                                    <td># 5</td>
+                                                    <td>15</td>
+                                                    <td>55</td>
+                                                    <td>1</td>
+                                                    <td>3</td>
+                                                    <td>1</td>
+                                                    <td>1</td>
+                                                    <td>0</td>
+                                                    <td>168</td>
+                                                    <td>12.0</td>
+                                                    <td>2</td>
+                                                    <td>13.3%</td>
+                                                    <td>20.0%</td>
+                                                    </tr>
+                                                    <td># 6</td>
+                                                    <td>19</td>
+                                                    <td>62</td>
+                                                    <td>5</td>
+                                                    <td>3</td>
+                                                    <td>7</td>
+                                                    <td>2</td>
+                                                    <td>0</td>
+                                                    <td>425</td>
+                                                    <td>30.36</td>
+                                                    <td>9</td>
+                                                    <td>47.4%</td>
+                                                    <td>15.8%</td>
+                                                    </tr>
+                                                    <td># 7</td>
+                                                    <td>3</td>
+                                                    <td>22</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>45</td>
+                                                    <td>15.0</td>
+                                                    <td>0</td>
+                                                    <td>0.0%</td>
+                                                    <td>0.0%</td>
+                                                    </tr>
+                                                    <td># 8</td>
+                                                    <td>7</td>
+                                                    <td>24</td>
+                                                    <td>1</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>64</td>
+                                                    <td>10.67</td>
+                                                    <td>0</td>
+                                                    <td>0.0%</td>
+                                                    <td>0.0%</td>
+                                                    </tr>
+                                                    <td># 9</td>
+                                                    <td>2</td>
+                                                    <td>7</td>
+                                                    <td>2</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>7</td>
+                                                    <td>N/A</td>
+                                                    <td>0</td>
+                                                    <td>0.0%</td>
+                                                    <td>0.0%</td>
+                                                    </tr>
+                                                    <td># 10</td>
+                                                    <td>10</td>
+                                                    <td>36</td>
+                                                    <td>4</td>
+                                                    <td>1</td>
+                                                    <td>2</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>154</td>
+                                                    <td>25.67</td>
+                                                    <td>2</td>
+                                                    <td>20.0%</td>
+                                                    <td>10.0%</td>
+                                                    </tr>
+                                                    <td># 11</td>
+                                                    <td>10</td>
+                                                    <td>11</td>
+                                                    <td>5</td>
+                                                    <td>1</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>58</td>
+                                                    <td>11.6</td>
+                                                    <td>0</td>
+                                                    <td>0.0%</td>
+                                                    <td>10.0%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <p class="p-3">Average Batting Position: 5.48
+                                                <br>Mode Batting Position: Opening
+                                            </p>
+                                        </div>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                        </div><!-- End Accordion -->
+                    </div><!-- End Card -->
+                </div><!-- End tab-pane batting -->
+                <!-- Bowling Content Tab -->
+                <div class="tab-pane fade" id="bowling" role="tabpanel" aria-labelledby="bowling-tab">
+                    <div class="card p-3">
+                        <div class="accordion">
+                            <div class="accordion-item ">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#IBNUUVKLTW" aria-expanded="true" aria-controls="-collapseOne">Bowling - Overall Summary</button></h2>
+                                <div class="accordion-collapse collapse show" id="IBNUUVKLTW" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <div class="p-3 table-responsive">
+                                            <table class="table table-bordered table-sm" style="background-color:white">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th scope="col">Innings</th>
+                                                        <th scope="col">Overs</th>
+                                                        <th scope="col">Maidens</th>
+                                                        <th scope="col">Wickets</th>
+                                                        <th scope="col">Runs</th>
+                                                        <th scope="col">5WI</th>
+                                                        <th scope="col">Average</th>
+                                                        <th scope="col">Strike Rate</th>
+                                                        <th scope="col">Economy</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>115</td>
+                                                        <td>686.0</td>
+                                                        <td>124</td>
+                                                        <td>119</td>
+                                                        <td>2125</td>
+                                                        <td>1</td>
+                                                        <td>17.86</td>
+                                                        <td>34.59</td>
+                                                        <td>3.1</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#DPOPEHHTKJ" aria-expanded="true" aria-controls="-collapseOne">Bowling Graphs</button></h2>
+                                <div class="accordion-collapse collapse show" id="DPOPEHHTKJ" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <p><a href="images/67634-Bowling.png"><img src="images/67634-Bowling.png" class="img-fluid" alt="images/67634-Bowling.png"></a></p>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                            <div class="accordion-item club">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#BYKFSTVJQF" aria-expanded="true" aria-controls="-collapseOne">Bowling - Stats by Club</button></h2>
+                                <div class="accordion-collapse collapse show" id="BYKFSTVJQF" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <div class="p-3 table-responsive">
+                                            <table class="table table-bordered table-sm" style="background-color:white">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th scope="col">Club</th>
+                                                        <th scope="col">Innings</th>
+                                                        <th scope="col">Overs</th>
+                                                        <th scope="col">Maidens</th>
+                                                        <th scope="col">Wickets</th>
+                                                        <th scope="col">Runs</th>
+                                                        <th scope="col">5WI</th>
+                                                        <th scope="col">Average</th>
+                                                        <th scope="col">Strike Rate</th>
+                                                        <th scope="col">Economy</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Gotham City Cricket Club</td>
+                                                        <td>91</td>
+                                                        <td>488.0</td>
+                                                        <td>78</td>
+                                                        <td>90</td>
+                                                        <td>1631</td>
+                                                        <td>0</td>
+                                                        <td>18.12</td>
+                                                        <td>32.53</td>
+                                                        <td>3.34</td>
+                                                    </tr>
+                                                    <td>Metropolis Cricket Club</td>
+                                                    <td>24</td>
+                                                    <td>198.0</td>
+                                                    <td>46</td>
+                                                    <td>29</td>
+                                                    <td>494</td>
+                                                    <td>1</td>
+                                                    <td>17.03</td>
+                                                    <td>40.97</td>
+                                                    <td>2.49</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                            <div class="accordion-item ">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#IQMCTUGTYO" aria-expanded="true" aria-controls="-collapseOne">Bowling - Overs Bowled Per Game</button></h2>
+                                <div class="accordion-collapse collapse show" id="IQMCTUGTYO" style="border-color:#DCDCDC">
+                                    <div class="accordion-body">
+                                        <div class="p-3 table-responsive">
+                                            <p>Average Overs Bowled Per Game: 4.73<br />Average Overs Bowled Per Innings: 5.97<br />Max Overs Bowled In One Innings: 20<br /></p>
+                                        </div>
+                                    </div><!-- End accordion-body -->
+                                </div><!-- End accordion-collapse -->
+                            </div><!-- End accordion-item -->
+                        </div><!-- End Accordion -->
+                    </div><!-- End Card -->
+                </div><!-- End End tab-pane bowling -->
+            </div><!-- End tab-content -->
+        </div><!-- End container p-3-->
+    </main>
+    <script>
+    if (!(location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "")) {
+        //alert("It's a local server!");
+
+        // Grade
+        var gradeCards = document.getElementsByClassName("grade");
+        for (var i = 0; i < gradeCards.length; i++) {
+            gradeCards[i].hidden = true;
+        };
+
+        // Club
+        //var clubCards = document.getElementsByClassName("club");
+        //for (var i = 0; i < clubCards.length; i++) {
+        //    clubCards[i].hidden = true;
+        //    };
+
+        // Opponent
+        var opponentCards = document.getElementsByClassName("opponent");
+        for (var i = 0; i < opponentCards.length; i++) {
+            opponentCards[i].hidden = true;
+        };
+
+    }
+    </script>
+</body>
+
+</html>
