@@ -1,80 +1,30 @@
 #!python3
 ###############################################################################
-# cricket.py - A scraper and a stats analyzer for local cricket
+# analysis.py - Data analysis stuff for LCSA 
 # jamesj223
 
 ###############################################################################
 # Imports
 
-import os, requests, bs4, re, sqlite3, time, string, random
+import os, re, time, string, random
 
 from numpy import median, nan, arange
 import matplotlib.pyplot as plt
 
 from datetime import datetime
 
+from database import dbQuery, createDirectory
+from fetch import getClubList
+
 ###############################################################################
 # User Input / Config
 
 debug = False
 
-# So I can have debug on, but not get the mass row update output
-dbDebug = False
-
 verbose = False
 
-# Include Mid Year / Winter
-includeMidYearComps = False
-
-# Include T20
-includeT20Comps = False
-
-# Include Womens Only Comps
-includeWomensOnlyComps = False
-
-# Inclue Veterans Comps 
-includeVeteransComps = False
-
-# Include Juniors Comps
-includeJuniorsComps = False
-
-# TODO Add something to the template(s) listing which comps were included/excluded from data
-
-# Sleep Duration after each HTTP request
-sleepDuration = 1
-
-# Show All
+# Have accordions expanded or collapsed by default
 showAll = True
-
-###############################################################################
-# DB Schemas
-
-# Add fetched level? That way stats functions know whether they can run
-# Could have the stats functions call the relevant fetch function if it hasn't already been run
-# Maybe later
-playerInfoTable = "PlayerInfo (PlayerID INTEGER PRIMARY KEY, FirstName TEXT, LastName TEXT, NumMatches INTEGER)"
-
-clubsTable = "Clubs (ClubID INTEGER PRIMARY KEY, ClubName TEXT)"
-
-matchesTable = "Matches (MatchID INTEGER PRIMARY KEY, ClubID INTEGER, Season TEXT, Round INTEGER, Grade TEXT, Opponent TEXT, Ground TEXT, HomeOrAway TEXT, WinOrLoss TEXT, FullScorecardAvailable TEXT, Captain TEXT, FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID))"
-
-# Changing BattingInningsID from IntegerPK  to TextPK. Will be MatchID+Innings (ABCD)
-battingTable = "Batting (BattingInningsID TEXT PRIMARY KEY, MatchID INTEGER, Innings INTEGER, Runs INTEGER, Position INTEGER, HowDismissed TEXT, Fours INTEGER, Sixes INTEGER, TeamWicketsLost INTEGER, TeamScore INTEGER, TeamOversFaced TEXT, FOREIGN KEY (MatchID) REFERENCES Matches(MatchID))"
-
-# Changing BowlingInningsID from IntegerPK  to TextPK. Will be MatchID+Innings (ABCD)
-bowlingTable = "Bowling (BowlingInningsID TEXT PRIMARY KEY, MatchID INTEGER, Innings INTEGER, Overs TEXT, Wickets INTEGER, Runs INTEGER, Maidens INTEGER, FOREIGN KEY (MatchID) REFERENCES Matches(MatchID))"
-
-fieldingTable = "Fielding (FieldingInningsID INTEGER PRIMARY KEY, MatchID INTEGER, Catches INTEGER, RunOuts INTEGER, FOREIGN KEY (MatchID) REFERENCES Matches(MatchID))"
-
-# Not Yet Implemented
-
-teamMatesTable = "TeamMates (PlayerID INTEGER PRIMARY KEY, FirstName TEXT, LastName Text)"
-
-teamMatesMatchesTable = "TeamMatesMatches (MatchID INTEGER, PlayerID INTEGER, FOREIGN KEY (MatchID) REFERENCES Matches(MatchID), FOREIGN KEY (PlayerID) REFERENCES TeamMates(PlayerID))"
-
-# Placeholder value for missing information
-
-unknown = "Unknown"
 
 ###############################################################################
 # Functions
@@ -82,482 +32,6 @@ unknown = "Unknown"
 def setGlobals(playerStatsFromMain):
     global playerStats
     playerStats = playerStatsFromMain
-
-########################################
-### Phase 1 - Fetch data
-
-# Creates a directory d if it doesnt already exist
-def createDirectory(d,parent=None):
-    if not os.path.exists(d):
-        os.mkdir(d)
-
-# Fetches a url using requests and then extracts the 'soup' for the loaded page
-def getSoup(url):
-
-    attempts = 0
-    while attempts <= 5:
-        try:
-            a = url
-            if debug:
-                    print(('Downloading page %s' % url))
-
-            res = requests.get(a)
-            res.raise_for_status()
-            if debug:
-                print("Returned status code: " + str( res ))
-            soup = bs4.BeautifulSoup(res.text, "html.parser")
-            return soup
-
-        except Exception:
-            #sleep for a second then try again
-            time.sleep(1)
-            attempts += 1
-
-# Creates the player database. Specifically the PlayerInfo, Matches, Batting, Bowling and Fielding tables
-def createDatabase(playerID, wipe=False):
-    
-    playerDB = "Player Databases/" + str(playerID) + ".db"
-
-    # If Database doesnt exist, create one.
-    if not os.path.exists(playerDB):
-        open(playerDB, 'a').close()
-
-    if wipe:
-        if debug:
-            print("Dropping all existing tables.")
-
-        dbQuery(playerDB,"DROP TABLE IF EXISTS PlayerInfo;")
-        dbQuery(playerDB,"DROP TABLE IF EXISTS Clubs;")
-        dbQuery(playerDB,"DROP TABLE IF EXISTS Matches;")
-        dbQuery(playerDB,"DROP TABLE IF EXISTS Batting;")
-        dbQuery(playerDB,"DROP TABLE IF EXISTS Bowling;")
-        dbQuery(playerDB,"DROP TABLE IF EXISTS Fielding;")
-
-    dbQuery(playerDB,"CREATE TABLE IF NOT EXISTS " + playerInfoTable + ";")
-    dbQuery(playerDB,"CREATE TABLE IF NOT EXISTS " + clubsTable + ";")
-    dbQuery(playerDB,"CREATE TABLE IF NOT EXISTS " + matchesTable + ";")
-    dbQuery(playerDB,"CREATE TABLE IF NOT EXISTS " + battingTable + ";")
-    dbQuery(playerDB,"CREATE TABLE IF NOT EXISTS " + bowlingTable + ";")
-    dbQuery(playerDB,"CREATE TABLE IF NOT EXISTS " + fieldingTable + ";")
-
-# Runs the supplied query against the specified database
-def dbQuery(database, query, values=() ):
-    conn = sqlite3.connect(database)
-    c = conn.cursor()
-    if len(values) > 0:
-        c.execute(query,values)
-    elif len(values) == 0:
-        c.execute(query)
-    else:
-        if debug:
-            print("Incorrect arguement for 'values' in function dbQuery")
-    conn.commit()
-    returnValue = c.fetchall()
-    if dbDebug:
-        print(str(c.rowcount) + " rows affected")
-    conn.close()
-
-    return returnValue
-
-def getPlayerName(playerID):
-    playerDB = "Player Databases/" + str(playerID) + ".db"
-    
-    query = "SELECT FirstName, LastName FROM PlayerInfo"
-    result = dbQuery(playerDB,query)
-
-    fullName = str(result[0][0]) + " " + str(result[0][1])
-
-    return fullName
-
-# Fetches player info, and populates the PlayerInfo table
-def fetchPlayerInfo(playerID):
-
-    soup = getSoup( "www.fake-cricket-stats-website.com" )
-
-    # Get Player Name
-    fullName = soup.select("#selector")[0].text
-    
-    firstName = fullName.split(" ", 1)[0]
-    lastName = fullName.split(" ", 1)[1]
-
-    if debug:
-        print("First Name: " + firstName)
-        print("Last Name: " + lastName)
-
-    # Get Number of Matches Played
-    numMatches = int(soup.select("#selector")[0].text)
-
-    if debug:
-        print("Matches played: " + str(numMatches))
-
-    # Insert into PlayerInfo table
-    playerDB = "Player Databases/" + str(playerID) + ".db"
-            
-    query = "INSERT OR IGNORE INTO PlayerInfo (PlayerID, FirstName, LastName, NumMatches) VALUES (?,?,?,?)"
-    values = (playerID, firstName, lastName, numMatches)
-    dbQuery(playerDB,query,values)
-
-    query = "UPDATE PlayerInfo SET NumMatches=? WHERE PlayerID = ?"
-    values = (numMatches, playerID)
-    dbQuery(playerDB,query,values)
-
-    if debug:
-        print("PlayerInfo Table Updated.")
-
-    # Get clubs
-    clubList = soup.select('selector')
-
-    if debug:
-        print(clubList)
-
-    for thing in clubList:
-        if debug:
-            print(thing.contents)
-        query = "INSERT OR IGNORE INTO Clubs (ClubID, ClubName) VALUES (?,?)"
-        values = ( thing['value'], thing.contents[0].get_text(strip=True).replace("'","") )
-        dbQuery(playerDB,query,values)
-
-# Returns the list of clubIDs for clubs that a player has played for
-def getClubList(playerID):
-    if debug:
-        print("getClubList("+str(playerID)+")")
-
-    playerDB = "Player Databases/" + str(playerID) + ".db"
-
-    clubList = dbQuery(playerDB, "SELECT * from Clubs")
-
-    return clubList
-
-
-# Fetches the list of all of the season a player has played for a club
-def getSeasonList(playerID):#, clubID):
-
-    if debug:
-        print("getSeasonList("+str(playerID)+")")
-
-    seasonList = []
-
-    clubList = getClubList(playerID)
-
-    for club in clubList:
-
-        clubID = club[0]
-
-        soup = getSoup( "www.fake-cricket-stats-website.com" )
-
-        childList = soup.find_all('#selector')
-
-        for child in childList:
-            parent = child.find_parent("#selector")
-
-            if not parent.has_attr('#selector'):
-                continue
-
-            onclick = parent['onclick']
-            front = 10 + len( str(playerID) ) + len( str( clubID) )
-            end = 15
-            seasonID = onclick[front:len(onclick)-end]
-            seasonRow = soup.find_all('tr', onclick=parent['onclick'])[0]
-            text = next(seasonRow.children, None).text
-
-            if ("/" not in text) and (not includeMidYearComps):
-                continue
-
-            if (clubID, seasonID, text) not in seasonList:
-                # Returning tuple due to season duplication bug
-                seasonList.append( (clubID, seasonID, text) )
-
-    def returnThird(elem):
-        return elem[2]          
-
-    return sorted(seasonList, key=returnThird )
-
-def getInningsID(matchID, inningsNum):
-    letters = "ZABCD"
-    return str(matchID)+letters[inningsNum]
-
-# First pass at populating the player database. 
-def populateDatabaseFirstPass(playerID, difference=0):
-
-    seasonList = getSeasonList(playerID)
-
-    playerDB = "Player Databases/" + str(playerID) + ".db"
-
-    matchList = []
-
-    battingInningsID = 1#select (count *) from Batting ?
-
-    bowlingInningsID = 1 
-
-    #clubList = getClubList(playerID)
-
-    # Small difference, only grab 2 most recent seasons
-    if difference <= 10:
-        seasonList = seasonList[-2:]
-
-    # For each season in list, get list of matches, and add them to matchList
-    for clubID, seasonID, seasonText in seasonList:
-
-        # Debugging 2x Last Season bug
-        #print str(club) + ", " + str(season)
-        #continue
-        # End
-
-        if 1:
-        #for club in clubList:
-
-            #clubID = str(club)#[0])
-            #print clubID
-
-            soup = getSoup( "www.fake-cricket-stats-website.com" )
-    
-            seasonText = soup.select("#selector")[0].get_text(strip=True)
-            #print seasonText
-    
-            matches = soup.select("#selector")
-    
-            prevMatchInfo = {}
-            #if True:
-            #   match = matches[2]
-            for match in matches:
-                matchOnclickText = match['onclick']
-                #print matchOnclickText
-                matchID = matchOnclickText[7:len(str(matchOnclickText))-2]
-    
-                innings = 0
-    
-                tds = match.select("td")
-    
-                superDebug = False
-                if superDebug:
-                    print(str(len(tds)))
-                    i = 0
-                    for thing in tds:
-                        print(str(i) + " : " + str(thing))
-                        i += 1
-    
-                # Fetch Match Specific Info
-    
-                grade = tds[0].get_text(strip=True).replace("'","")
-                
-                if grade == "":
-                    innings = 2
-                    if debug:
-                        print("Multi Innings Match - Fetching Previous Info")
-                    grade = prevMatchInfo['grade']
-                    Round = prevMatchInfo['Round']
-                    opponent = prevMatchInfo['opponent']
-                    ground = prevMatchInfo['ground']
-                    homeOrAway = prevMatchInfo['homeOrAway']
-                    winOrLoss = prevMatchInfo['winOrLoss']
-                    fullScorecardAvailable = prevMatchInfo['fullScorecardAvailable']
-                    captain = prevMatchInfo['captain']
-    
-    
-                else:
-                    grade = tds[0].get_text(strip=True).replace("'","")
-                    
-                    innings = 1
-    
-                    Round = tds[1].get_text(strip=True)
-    
-                    opponent = tds[3].select("span")[0].get_text(strip=True).replace("'","")
-    
-                    ground = unknown
-    
-                    homeOrAway = unknown
-                    regex = re.findall( r'(red|green)', tds[4].select("img")[0]["src"] )[0]
-                    if regex == "green":
-                        homeOrAway = "Home"
-                    elif regex == "red":
-                        homeOrAway = "Away"
-    
-                    winOrLoss = unknown
-                    
-                    fullScorecardAvailable = unknown
-    
-                    captain = unknown
-    
-                # Fetch Batting Specific Info
-    
-                batting = match.select("td.batting")
-    
-                if (batting[0].get_text(strip=True) != '') and (batting[1].get_text(strip=True) != '') and (batting[2].get_text(strip=True) != 'dnb'):
-                    battingRuns = int(batting[0].get_text(strip=True))
-                    battingPos = int(batting[1].get_text(strip=True))
-                    battingOut = batting[2].get_text(strip=True)
-    
-                # Fetch Bowling Specific Info
-    
-                bowling = match.select("td.bowling")
-    
-                if bowling[0].get_text(strip=True)!= '':
-                    
-                    bowlingOvers = bowling[0].get_text(strip=True)
-    
-                    temp = bowling[1].get_text(strip=True)
-
-                    if temp != '':
-                        bowlingMaidens = int(temp)
-                    else:
-                        bowlingMaidens = 0
-                    
-                    temp = bowling[2].get_text(strip=True)
-                    if temp != '':
-                        bowlingWickets = int(temp)
-                    else:
-                        bowlingWickets = 0
-    
-                    temp = bowling[3].get_text(strip=True)
-                    if temp != '':    
-                        bowlingRuns = int(temp)
-                    else:
-                        if debug:
-                            print("I dont think stats from this match should be included.")
-                        bowlingRuns = 0
-    
-                # Fetch Fielding Specific Info
-                # len fielding 5
-                # Catches, CatchesWK, RunoutUnassisted, RunoutAssisted, Stumping
-    
-                fielding = match.select("td.fielding")
-    
-                ### DB Inserts into various tables
-                ##
-                # 
-    
-
-                # Comp/Grade Inclusion/Exclusion Checks
-                loweredGradeString = grade.lower()
-                excludedComp = False
-
-                #  T20 Comps
-                if ("t20" in loweredGradeString) and (not includeT20Comps):
-                    excludedComp = True
-
-                # Veterans Comps
-                if ("veteran" in loweredGradeString) and (not includeVeteransComps):
-                    excludedComp = True
-
-                # Women's Only Comps
-                if ("women" in loweredGradeString) and (not includeWomensOnlyComps):
-                    excludedComp = True
-
-                # Juniors Comps
-                juniorStrings = ["under", "u11","u12","u13","u14","u15","u16","u17","u18","u19","u21"]
-                if (not includeJuniorsComps):
-                    for js in juniorStrings:
-                        if js in loweredGradeString:
-                            excludedComp = True
-                            continue
-
-                if not excludedComp:
-
-                    #Matches
-                    if matchID not in matchList:
-                        # It wont be in DB so insert
-                        # Consider changing "INSERT OR IGNORE" to "INSERT OR REPLACE"
-                        #query = "INSERT OR IGNORE INTO Matches (MatchID, ClubID, Season, Round, Grade, Opponent, Ground, HomeOrAway, WinOrLoss, FullScorecardAvailable, Captain ) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-                        query = "INSERT OR REPLACE INTO Matches (MatchID, ClubID, Season, Round, Grade, Opponent, Ground, HomeOrAway, WinOrLoss, FullScorecardAvailable, Captain ) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-                        values = (matchID, clubID, seasonText, Round, grade, opponent, ground, homeOrAway, winOrLoss, fullScorecardAvailable, captain)
-                        dbQuery(playerDB,query,values)
-        
-                        matchList.append(matchID)
-        
-                        # If verbose Print Match Info 
-                        if verbose:
-        
-                            #Match Info
-                            print("MatchID: " + str(matchID))
-                            print("ClubID: " + str(clubID))
-                            print("Season: " + seasonText)
-                            print("Round: " + str(Round))
-                            print("Grade: " + str(grade))
-                            print("Innings: " + str(innings))# Not in Matches Table
-                            print("Opponent: " + opponent)
-                            print("Ground: " + ground)
-                            print("HomeOrAway: " + homeOrAway)
-                            print("WinOrLoss: " + winOrLoss)
-                            print("FullScorecardAvailable: " + fullScorecardAvailable)
-                            print("Captain: " + captain)
-        
-                    #Batting
-                    if batting[0].get_text(strip=True) != '' and batting[2].get_text(strip=True) != 'dnb':
-
-                        battingInningsID = getInningsID(matchID,innings)
-
-                        # Consider changing "INSERT OR IGNORE" to "REPLACE"
-                        #query = "INSERT OR IGNORE INTO Batting (BattingInningsID, MatchID, Innings, Runs, Position, HowDismissed, Fours, Sixes, TeamWicketsLost, TeamScore, TeamOversFaced) VALUES (?,?,?,?,?,?,null,null,null,null,null)"
-                        query = "INSERT OR REPLACE INTO Batting (BattingInningsID, MatchID, Innings, Runs, Position, HowDismissed, Fours, Sixes, TeamWicketsLost, TeamScore, TeamOversFaced) VALUES (?,?,?,?,?,?,null,null,null,null,null)"
-                        values = (battingInningsID, matchID, innings, battingRuns, battingPos, battingOut)#, unknown, unknown, unknown, unknown, unknown)
-                        dbQuery(playerDB,query,values)
-        
-                        #battingInningsID += 1
-        
-                        # If Debug Print Batting/Innings Info
-                        if verbose:
-                            print("Batting Figures:")
-                            print("\tRuns: " + str(battingRuns))
-                            print("\tPosition: " + str(battingPos))
-                            print("\tHow out: " + battingOut)
-        
-        
-                    #Bowling
-                    if bowling[0].get_text(strip=True) != '':
-        
-                        bowlingInningsID = getInningsID(matchID,innings)
-
-                        # Consider changing "INSERT OR IGNORE" to "REPLACE"
-                        #query = "INSERT OR IGNORE INTO Bowling (bowlingInningsID, MatchID, Innings, Overs, Wickets, Runs, Maidens) VALUES (?,?,?,?,?,?,?)"
-                        query = "INSERT OR REPLACE INTO Bowling (bowlingInningsID, MatchID, Innings, Overs, Wickets, Runs, Maidens) VALUES (?,?,?,?,?,?,?)"
-                        values = (bowlingInningsID, matchID, innings, bowlingOvers, bowlingWickets, bowlingRuns, bowlingMaidens)#, unknown, unknown, unknown, unknown, unknown)
-                        dbQuery(playerDB,query,values)
-
-                        #bowlingInningsID += 1
-
-                        # If Debug Print Bowling/Innings Info
-                        if verbose:
-                            print("Bowling Figures:")
-                            print("\tOvers: " + bowlingOvers)
-                            print("\tMaidens: " + str(bowlingMaidens))
-                            print("\tWickets: " + str(bowlingWickets))
-                            print("\tRuns: " + str(bowlingRuns))
-        
-                    #Fielding
-                    #if fielding[0].string.encode("ascii", "ignore") != '':
-                    #   print "Fielding Figures:"
-        
-                    # Fetch High Level Batting, Bowling and Fielding stats
-                    # Insert into relevant tables.
-    
-                prevMatchInfo = {
-                    'matchID': matchID,
-                    'clubID': clubID,
-                    'seasonText': seasonText,
-                    'Round': Round,
-                    'grade': grade,
-                    'opponent': opponent,
-                    'ground': ground,
-                    'homeOrAway': homeOrAway,
-                    'winOrLoss': winOrLoss,
-                    'fullScorecardAvailable': fullScorecardAvailable,
-                    'captain': captain
-                }
-    
-                #print ""
-    
-            time.sleep(sleepDuration)
-
-# Second pass at populating the player database. 
-def populateDatabaseSecondPass(playerID):
-    print("TODO")
-
-# Third pass at populating the player database. 
-def populateDatabaseThirdPass(playerID):
-    print("TODO")
-
-########################################
-### Phase 2 - Analyse data and present statistics
 
 def stats_PlayerInfo(playerID):
 
@@ -727,6 +201,7 @@ def getBattingStats(inningsList):
 def getBowlingStats(inningsList):
     # OLD
     #headers = ("Innings", "Overs", "Wickets", "Runs", "Maidens", "Average", "Strike Rate", "Economy")
+    # New - Updated to match order. + 5WI
     headers = ("Innings", "Overs", "Maidens", "Wickets", "Runs", "5WI", "Average", "Strike Rate", "Economy")
 
     # Initialise and zero all variables
@@ -1076,19 +551,28 @@ def stats_JuniorSenior(playerID, discipline):
 ####################
 ## Batting Only Stats
 
-# Batting stats by DismissalBreakdown
-def stats_Batting_DismissalBreakdown(playerID):
+def dismissalBreakdownHelper(playerID,numSeasons=False):
     playerDB = "Player Databases/" + str(playerID) + ".db"
 
-    accordionHelperStart("Dismissal Breakdown", showAll)
-    playerStats.write('<div class="p-3 table-responsive">')
-
-    #playerStats.write('<br><br>')
-    #playerStats.write('<div class="card">')
     playerStats.write('<table class="table table-bordered table-sm caption-top">')
-   # playerStats.write( "<caption>"+"Dismissal Breakdown"+"</caption>" )
+    #playerStats.write( "<caption>"+"Dismissal Breakdown"+"</caption>" )
 
-    dismissalStats = dbQuery(playerDB, "SELECT HowDismissed, COUNT(*) as Count from Batting GROUP BY HowDismissed ORDER BY Count DESC")
+    if numSeasons:
+
+        matchList = []
+
+        seasonList = dbQuery(playerDB, "SELECT DISTINCT Season FROM Matches")
+
+        for season in sorted(seasonList)[-numSeasons:]:
+
+            matchList += dbQuery(playerDB, "SELECT MatchID FROM Matches WHERE Season='" + season[0] + "'")
+            formattedMatchList = "(" + ','.join( [str( i[0] ) for i in matchList] ) + ")"
+        
+        dismissalStats = dbQuery(playerDB, "SELECT HowDismissed, COUNT(*) as Count from Batting WHERE MatchID IN " + formattedMatchList + "GROUP BY HowDismissed ORDER BY Count DESC")
+
+    else:
+        dismissalStats = dbQuery(playerDB, "SELECT HowDismissed, COUNT(*) as Count from Batting GROUP BY HowDismissed ORDER BY Count DESC")
+
 
     headers = [ str(i[0]) for i in dismissalStats ]
 
@@ -1104,6 +588,19 @@ def stats_Batting_DismissalBreakdown(playerID):
     printStats(headers, stats)
     printStats(False, percentages)
     playerStats.write("</tbody></table>")
+
+# Batting stats by DismissalBreakdown
+def stats_Batting_DismissalBreakdown(playerID):
+    
+    accordionHelperStart("Dismissal Breakdown", showAll)
+    playerStats.write('<div class="p-3 table-responsive">')
+
+    playerStats.write('Last/Current Season')
+    dismissalBreakdownHelper(playerID,1)
+
+    playerStats.write('Overall')
+    dismissalBreakdownHelper(playerID)
+    
     playerStats.write("</div>")
     accordionHelperEnd()
 
@@ -1172,31 +669,11 @@ def stats_Batting_Position(playerID):
     playerStats.write('</div>')
     accordionHelperEnd()
 
-# Batting stats by NohitBrohitLine - FIX THIS FOR HTML OUTPUT
-def stats_Batting_NohitBrohitLine(playerID):
-    playerDB = "Player Databases/" + str(playerID) + ".db"
-
-    playerStats.write( "Nohit/Brohit Line!"+"\n" )
-
-    # Is median the best way to find this line?
-    # Or find the number with the biggest difference in average? 
-    # Would probably have to exclude 0 
-    # Find the score where players get "stuck"
-    # IE I think I get out a lot around 13, once I'm passed that I'm good
-
-    line = median( dbQuery(playerDB, "SELECT Runs from Batting ORDER BY Runs ASC") )
-
-    playerStats.write( str( line ) +"\n" )
-    
-    averageWhenCrossLine = "TODO"
-
-    playerStats.write("\n")
-
-# Batting stats by Bingo - FIX THIS FOR HTML OUTPUT
+# Batting stats by Bingo - Output a colour coded bingo table of scores a player as made
 def stats_Batting_Bingo(playerID):
     playerDB = "Player Databases/" + str(playerID) + ".db"
 
-    playerStats.write( "Bingo!"+"\n" )
+    accordionHelperStart("Batting Bingo", showAll)
 
     bingoList = dbQuery(playerDB, "SELECT DISTINCT Runs FROM Batting ORDER BY Runs ASC")
 
@@ -1204,38 +681,85 @@ def stats_Batting_Bingo(playerID):
 
     missingNumbers = []
 
+    playerStats.write('<div class="p-3 table-responsive">')
+    playerStats.write('<table class="table table-bordered table-sm caption-top">')
+    playerStats.write('<tbody>')
     for i in range( 0, formattedBingoList[-1]+1 ):
-        if i not in formattedBingoList:
-            missingNumbers.append(i)
-
-    # Make this a table 0 to high score. Colour the squares in?
-    # And number them with how many times you've hit each score
-    playerStats.write( "Hit"+"\n" )
-    playerStats.write( str( formattedBingoList ) + "\n" )
-    playerStats.write( "Miss"+"\n" )
-    playerStats.write( str( missingNumbers )  +"\n" )
-
-    # Find next bingo number
+        if i % 10 == 0:
+            playerStats.write('<tr style="border: 1px solid black;">')
+        if i in formattedBingoList:
+            playerStats.write('<td style="border: 1px solid black; background-color: lightgreen;">'+str(i)+'</td>')
+        else:
+            playerStats.write('<td style="border: 1px solid black; background-color: tomato;">'+str(i)+'</td>')
+        
+    playerStats.write('</tbody></table>')
     
-    playerStats.write("\n")
+    playerStats.write("</div>")
+
+    accordionHelperEnd()
+
+# Currently outputing as a table. I think this information would work better as a graph
+# Or maybe show every 10 runs? 0,1,10,20 etc
+# Probably not point showing it past 50 tbh
+# Batting stats by NohitBrohitLine
+def stats_Batting_NohitBrohitLine(playerID):
+    playerDB = "Player Databases/" + str(playerID) + ".db"
+
+    caption = "Nohit/Brohit Line"
+
+    discipline = "Batting"
+
+    highScore = dbQuery(playerDB, "SELECT max(Runs) FROM Batting")[0][0]
+
+    scoreList = dbQuery(playerDB, "SELECT DISTINCT Runs FROM Batting ORDER BY Runs ASC")
+    formattedscoreList = [ i[0] for i in scoreList ]
+
+    stepList = [0,1,10,20,30,40,50]
+
+    indexCount = 0
+    for i in stepList:#range(0, highScore):
+        #if i in formattedscoreList:
+
+        inningsList = dbQuery(playerDB, "SELECT * FROM Batting WHERE Runs >= " + str(i) )
+
+        multiLineDisciplineHelper(discipline, inningsList, "Score >=", str(i), indexCount, caption, "brohit")
+
+        indexCount += 1
+    
+    playerStats.write("</tbody></table>")
+    playerStats.write("</div>")
+
+    accordionHelperEnd()
 
 ####################
 ## Bowling Only Stats
 
-# Scrap this and bring these stats into Discipline Helper?
-# Would allow viewing these stats for recent/season/grade etc
-# Bowling Workload stats - FIX THIS FOR HTML OUTPUT
-def stats_Bowling_Workload(playerID):
+def bowlingWorkloadHelper(playerID, numSeasons=False):
+
     playerDB = "Player Databases/" + str(playerID) + ".db"
 
-    overs = dbQuery(playerDB, "SELECT SUM(Cast(Overs as Int)) FROM Bowling")[0][0]
-    #print overs
-    innings = dbQuery(playerDB, "SELECT COUNT(Cast(Overs as Int)) FROM Bowling")[0][0]
-    #print innings
-    maxOvers = dbQuery(playerDB, "SELECT Max(Cast(Overs as Int)) FROM Bowling")[0][0]
-    #print maxOvers
-    games = dbQuery(playerDB, "SELECT NumMatches FROM PlayerInfo")[0][0]
-    #print games
+    if numSeasons:
+
+        matchList = []
+
+        seasonList = dbQuery(playerDB, "SELECT DISTINCT Season FROM Matches")
+
+        for season in sorted(seasonList)[-numSeasons:]:
+
+            matchList += dbQuery(playerDB, "SELECT MatchID FROM Matches WHERE Season='" + season[0] + "'")
+            formattedMatchList = "(" + ','.join( [str( i[0] ) for i in matchList] ) + ")"
+
+        overs = dbQuery(playerDB, "SELECT SUM(Cast(Overs as Int)) FROM Bowling WHERE MatchID IN " + formattedMatchList)[0][0]
+        innings = dbQuery(playerDB, "SELECT COUNT(Cast(Overs as Int)) FROM Bowling WHERE MatchID IN " + formattedMatchList)[0][0]
+        maxOvers = dbQuery(playerDB, "SELECT Max(Cast(Overs as Int)) FROM Bowling WHERE MatchID IN " + formattedMatchList)[0][0]
+        games = len(matchList)
+
+
+    else:
+        overs = dbQuery(playerDB, "SELECT SUM(Cast(Overs as Int)) FROM Bowling")[0][0]
+        innings = dbQuery(playerDB, "SELECT COUNT(Cast(Overs as Int)) FROM Bowling")[0][0]
+        maxOvers = dbQuery(playerDB, "SELECT Max(Cast(Overs as Int)) FROM Bowling")[0][0]
+        games = dbQuery(playerDB, "SELECT NumMatches FROM PlayerInfo")[0][0]
 
     if overs:
         opg = round(overs/games ,2)
@@ -1244,10 +768,6 @@ def stats_Bowling_Workload(playerID):
         opg = "N/A"
         opi = "N/A"
 
-    accordionHelperStart("Bowling - Overs Bowled Per Game", showAll) 
-
-    playerStats.write('<div class="p-3 table-responsive">')
-
     playerStats.write("<p>")
 
     playerStats.write( "Average Overs Bowled Per Game: " + str( opg ) + "<br />")
@@ -1255,6 +775,22 @@ def stats_Bowling_Workload(playerID):
     playerStats.write( "Max Overs Bowled In One Innings: " + str(maxOvers) + "<br />")
     
     playerStats.write("</p>")
+
+
+# Scrap this and bring these stats into Discipline Helper?
+# Would allow viewing these stats for recent/season/grade etc
+# Bowling Workload stats - FIX THIS FOR HTML OUTPUT
+def stats_Bowling_Workload(playerID):
+
+    accordionHelperStart("Bowling - Overs Bowled Per Game", showAll) 
+
+    playerStats.write('<div class="p-3 table-responsive">')
+
+    playerStats.write('Last/Current Season')
+    bowlingWorkloadHelper(playerID,1)
+
+    playerStats.write('Overall')
+    bowlingWorkloadHelper(playerID)
 
     playerStats.write("</div>")
 
@@ -1659,10 +1195,10 @@ if (!(location.hostname === "localhost" || location.hostname === "127.0.0.1" || 
         };
 
     // Club
-    //var clubCards = document.getElementsByClassName("club");
-    //for (var i = 0; i < clubCards.length; i++) {
-    //    clubCards[i].hidden = true;
-    //    };
+    var clubCards = document.getElementsByClassName("club");
+    for (var i = 0; i < clubCards.length; i++) {
+        clubCards[i].hidden = true;
+        };
 
     // Opponent
     var opponentCards = document.getElementsByClassName("opponent");
@@ -1671,6 +1207,17 @@ if (!(location.hostname === "localhost" || location.hostname === "127.0.0.1" || 
         };
 
 }
+document.addEventListener("keydown", function(){
+    var x=event.keyCode || event.which;
+    if(x==72)
+    {
+    var accordions = document.getElementsByClassName("accordion-item");
+    for (var i = 0; i < accordions.length; i++)
+    {
+        accordions[i].hidden = false;
+    }
+    }
+}) 
 </script>""")
     playerStats.write("""\n</body></html>""")
     #playerStats.write("""\n</div></div></main></body></html>""")
@@ -1756,6 +1303,7 @@ def stats_Batting_PercentOfTeam(playerID):
 
     # % of Team Overs faced for each game
     # Min, Max, Average
+    # Hard/potentially impossible to calculate
     # FOW data doesn't have overs (when it is even there)
 
 ## Need Fetch Pass 3
@@ -1764,6 +1312,14 @@ def stats_Batting_PercentOfTeam(playerID):
 def stats_TeamMate(playerID, minGames):
     print("TODO")
 
+## Need Additional Information
+
 # Stats by Captain
-def stats_Captain(playerID, minGames):
+def stats_Captain(playerID):
+    print("TODO")
+
+
+## Template 
+# Stats by THING
+def stats_THING(playerID):
     print("TODO")

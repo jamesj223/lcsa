@@ -8,7 +8,9 @@
 
 import os
 
-from cricket import *
+from database import *
+from fetch import *
+from analysis import *
 
 ###############################################################################
 # User Input
@@ -106,12 +108,14 @@ for playerID in playerIDList:
         ## Batting Only Functions
         stats_Batting_DismissalBreakdown(playerID)
         stats_Batting_Position(playerID)
-        #stats_Batting_NohitBrohitLine(playerID)
-        #stats_Batting_Bingo(playerID)
 
         ## Move specific functions to bottom of page
         stats_Season(playerID, "Batting")
         stats_JuniorSenior(playerID, "Batting")
+
+        ## "Fun" stuff at the very bottom
+        stats_Batting_Bingo(playerID)
+        stats_Batting_NohitBrohitLine(playerID)
 
         writeHTMLTemplatePart3()
 
