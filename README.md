@@ -31,3 +31,5 @@ And here are some screenshots of the various different stats/views.
 ![Screenshot3](/Screenshots/LCSA-Screenshot3.png)
 ![Screenshot4](/Screenshots/LCSA-Screenshot4.png)
 ![Screenshot5](/Screenshots/LCSA-Screenshot5.png)
+![Screenshot6](/Screenshots/LCSA-Screenshot6.png)
+![Screenshot7](/Screenshots/LCSA-Screenshot7.png)
