@@ -27,9 +27,25 @@ Can be especially helpful for captains to help work out the batting order and bo
 And here are some screenshots of the various different stats/views.
 
 ![Screenshot1](/Screenshots/LCSA-Screenshot1.png)
+*Batting View*
+
 ![Screenshot2](/Screenshots/LCSA-Screenshot2.png)
+*Bowling View*
+
 ![Screenshot3](/Screenshots/LCSA-Screenshot3.png)
+*Dismissal Breakdown*
+
 ![Screenshot4](/Screenshots/LCSA-Screenshot4.png)
+*Batting Position*
+
 ![Screenshot5](/Screenshots/LCSA-Screenshot5.png)
+*Bowling Workload*
+
 ![Screenshot6](/Screenshots/LCSA-Screenshot6.png)
+*Batting Stats by Season*
+
 ![Screenshot7](/Screenshots/LCSA-Screenshot7.png)
+*Batting Bingo*
+
+![Screenshot8](/Screenshots/LCSA-Screenshot8.png)
+*Nohit/Brohit*
