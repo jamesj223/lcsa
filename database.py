@@ -81,22 +81,31 @@ def createDatabase(playerID, wipe=False):
 
 # Runs the supplied query against the specified database
 def dbQuery(database, query, values=() ):
-    conn = sqlite3.connect(database)
-    c = conn.cursor()
-    if len(values) > 0:
-        c.execute(query,values)
-    elif len(values) == 0:
-        c.execute(query)
-    else:
-        if debug:
-            print("Incorrect arguement for 'values' in function dbQuery")
-    conn.commit()
-    returnValue = c.fetchall()
-    if verbose:
-        print(str(c.rowcount) + " rows affected")
-    conn.close()
 
-    return returnValue
+    try:
+        conn = sqlite3.connect(database)
+        c = conn.cursor()
+        if len(values) > 0:
+            c.execute(query,values)
+        elif len(values) == 0:
+            c.execute(query)
+        else:
+            if debug:
+                print("Incorrect arguement for 'values' in function dbQuery")
+        conn.commit()
+        returnValue = c.fetchall()
+        if dbDebug:
+            print(str(c.rowcount) + " rows affected")
+        conn.close()
+
+        return returnValue
+
+    except:
+        print("Error in dbQuery")
+        print("Database: " + str(database))
+        print("Query: " + str(query))
+        #print("Values: " + str(values))
+        raise Exception("Error in dbQuery")
 
 # Get player name from the database
 def getPlayerName(playerID):
